@@ -6,8 +6,8 @@ import java.util.Set;
 public class FileManager {
 
     // File names
-    public static final String USERS_FILE = "users.list";
-    public static final String FRIENDSHIPS_FILE = "friendships.list";
+    public static final String USERS_FILE = "users.txt";
+    public static final String FRIENDSHIPS_FILE = "friendships.txt";
 
     // =========================================
     // LOAD USERS
