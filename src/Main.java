@@ -4,103 +4,122 @@ import java.util.Scanner;
 
 public class Main {
 
-    private static final String FRIENDS_FILE = "friends.txt";
-    private static final String FRIENDSHIPS_FILE = "friendships.txt";
-
     public static void main(String[] args) {
         Graph graph = new Graph();
-        InputHandler inputHandler = new InputHandler(graph);
+        Scanner scanner = new Scanner(System.in);
 
+        // Load data from files
         try {
-            inputHandler.loadFriends(FRIENDS_FILE);
-            inputHandler.loadFriendships(FRIENDSHIPS_FILE);
+            FileManager.loadUsers(graph);
+            FileManager.loadFriendships(graph);
+
+            System.out.println("Data loaded successfully.");
+            System.out.println("Users: " + graph.getUserCount());
+            System.out.println(
+                "Friendships: " + graph.getFriendshipCount()
+            );
+
         } catch (IOException e) {
-            System.err.println("Error loading input files: " + e.getMessage());
+            System.out.println("Error loading data: " + e.getMessage());
+            scanner.close();
             return;
         }
 
-        FriendCircleDetector detector = new FriendCircleDetector(graph);
-        int choice = 0;
-        try (Scanner scanner = new Scanner(System.in)) {
-            do {
-                displayMenu();
+        FriendCircleDetector detector =
+                new FriendCircleDetector(graph);
 
-                System.out.print("Enter your choice: ");
+        boolean running = true;
 
-                if (!scanner.hasNextInt()) {
-                    System.out.println("Invalid input! Please enter a number.\n");
-                    scanner.nextLine();
-                    continue;
-                }
+        while (running) {
+            displayMenu();
+            System.out.print("Enter your choice: ");
 
-                choice = scanner.nextInt();
-                scanner.nextLine();
+            String input = scanner.nextLine().trim();
 
-                System.out.println();
+            int choice;
 
-                switch (choice) {
-                    case 1:
-                        viewTotalUsers(graph);
-                        break;
+            try {
+                choice = Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.println(
+                    "Invalid input. Please enter a number."
+                );
+                continue;
+            }
 
-                    case 2:
-                        viewTotalFriendships(graph);
-                        break;
+            switch (choice) {
+                case 1:
+                    System.out.println(
+                        "Total users: " + graph.getUserCount()
+                    );
+                    break;
 
-                    case 3:
-                        viewSocialNetworkGraph(graph);
-                        break;
+                case 2:
+                    System.out.println(
+                        "Total friendships: "
+                        + graph.getFriendshipCount()
+                    );
+                    break;
 
-                    case 4:
-                        viewFriendCircleResults(detector);
-                        break;
+                case 3:
+                    System.out.println("\n===== SOCIAL NETWORK GRAPH =====");
+                    graph.displayGraph();
+                    break;
 
-                    case 0:
-                        System.out.println("Exiting program. Goodbye!");
-                        break;
+                case 4:
+                    detector.displayFriendCircles();
+                    break;
 
-                    default:
-                        System.out.println(
-                            "Invalid choice! Please select 0-4."
-                        );
-                }
+                case 5:
+                    saveData(graph);
+                    break;
 
-            } while (choice != 0);
+                case 0:
+                    running = false;
+                    System.out.println("Exiting program...");
+                    break;
+
+                default:
+                    System.out.println(
+                        "Invalid choice. Please try again."
+                    );
+            }
         }
+
+        scanner.close();
     }
 
+    // Display the main menu
     private static void displayMenu() {
-        System.out.println("==========================================");
-        System.out.println("     SOCIAL NETWORK FRIEND CIRCLE");
-        System.out.println("==========================================");
+        System.out.println("\n==================================");
+        System.out.println("  FRIEND CIRCLE DETECTOR");
+        System.out.println("==================================");
         System.out.println("1. View Total Users");
         System.out.println("2. View Total Friendships");
         System.out.println("3. View Social Network Graph");
-        System.out.println("4. View Friend Circle Results");
+        System.out.println("4. Detect Friend Circles");
+        System.out.println("5. Save Data to Files");
         System.out.println("0. Exit");
-        System.out.println("==========================================");
+        System.out.println("==================================");
     }
 
-    private static void viewTotalUsers(Graph graph) {
-        System.out.println("---------- TOTAL USERS ----------");
-        System.out.println("Total users: " + graph.getFriendCount());
-    }
+    // Save users and friendships
+    private static void saveData(Graph graph) {
+        try {
+            FileManager.saveAll(graph);
+            System.out.println("Data saved successfully.");
+            System.out.println(
+                "Users saved to: " + FileManager.USERS_FILE
+            );
+            System.out.println(
+                "Friendships saved to: "
+                + FileManager.FRIENDSHIPS_FILE
+            );
 
-    private static void viewTotalFriendships(Graph graph) {
-        System.out.println("------- TOTAL FRIENDSHIPS -------");
-        System.out.println(
-            "Total friendships: " + graph.getFriendshipCount()
-        );
-    }
-
-    private static void viewSocialNetworkGraph(Graph graph) {
-        System.out.println("------- SOCIAL NETWORK GRAPH -------");
-        graph.displayGraph();
-    }
-
-    private static void viewFriendCircleResults(
-            FriendCircleDetector detector) {
-        System.out.println("------- FRIEND CIRCLE RESULTS -------");
-        detector.displayFriendCircles();
+        } catch (IOException e) {
+            System.out.println(
+                "Error saving data: " + e.getMessage()
+            );
+        }
     }
 }

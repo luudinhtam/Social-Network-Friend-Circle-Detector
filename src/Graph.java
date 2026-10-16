@@ -1,38 +1,39 @@
 
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-
-
+import java.util.List;
 
 public class Graph {
-    private final Map<Integer, Friend> friends;
+
+    private final Map<Integer, User> users;
     private final Map<Integer, List<Integer>> adjacencyList;
 
     public Graph() {
-        friends = new LinkedHashMap<>();
+        users = new LinkedHashMap<>();
         adjacencyList = new LinkedHashMap<>();
     }
 
-    // Add a friend to the graph
-    public boolean addFriend(Friend friend) {
-        if (friend == null || friends.containsKey(friend.getId())) {
+    // Add a user to the graph
+    public boolean addUser(User user) {
+        if (user == null || users.containsKey(user.getId())) {
             return false;
         }
 
-        friends.put(friend.getId(), friend);
-        adjacencyList.put(friend.getId(), new ArrayList<>());
+        users.put(user.getId(), user);
+        adjacencyList.put(user.getId(), new ArrayList<>());
+
         return true;
     }
 
-    // Add an undirected friendship between two friends
+    // Add an undirected friendship between two users
     public boolean addFriendship(int id1, int id2) {
         if (id1 == id2
-                || !friends.containsKey(id1)
-                || !friends.containsKey(id2)) {
+                || !users.containsKey(id1)
+                || !users.containsKey(id2)) {
             return false;
         }
 
@@ -42,20 +43,21 @@ public class Graph {
 
         adjacencyList.get(id1).add(id2);
         adjacencyList.get(id2).add(id1);
+
         return true;
     }
 
-    // Get a friend by ID
-    public Friend getFriend(int id) {
-        return friends.get(id);
+    // Get a user by ID
+    public User getUser(int id) {
+        return users.get(id);
     }
 
-    // Get all friends
-    public Collection<Friend> getAllFriends() {
-        return Collections.unmodifiableCollection(friends.values());
+    // Get all users
+    public Collection<User> getAllUsers() {
+        return Collections.unmodifiableCollection(users.values());
     }
 
-    // Get adjacent friend IDs
+    // Get adjacent user IDs
     public List<Integer> getNeighbors(int id) {
         List<Integer> neighbors = adjacencyList.get(id);
 
@@ -66,17 +68,17 @@ public class Graph {
         return Collections.unmodifiableList(neighbors);
     }
 
-    // Check whether a friend exists
-    public boolean containsFriend(int id) {
-        return friends.containsKey(id);
+    // Check whether a user exists
+    public boolean containsUser(int id) {
+        return users.containsKey(id);
     }
 
-    // Get the number of friends
-    public int getFriendCount() {
-        return friends.size();
+    // Get the total number of users
+    public int getUserCount() {
+        return users.size();
     }
 
-    // Get the number of unique friendships
+    // Get the total number of unique friendships
     public int getFriendshipCount() {
         int total = 0;
 
@@ -87,26 +89,33 @@ public class Graph {
         return total / 2;
     }
 
-    // Display the graph
+    // Display the social network graph
     public void displayGraph() {
         for (Map.Entry<Integer, List<Integer>> entry
                 : adjacencyList.entrySet()) {
 
-            Friend friend = friends.get(entry.getKey());
+            User user = users.get(entry.getKey());
 
-            System.out.print(friend.getName() + " (ID: "
-                    + friend.getId() + ") -> ");
+            System.out.print(
+                user.getName() + " (ID: " + user.getId() + ") -> "
+            );
 
             List<Integer> neighbors = entry.getValue();
 
-            for (int i = 0; i < neighbors.size(); i++) {
-                Friend neighbor = friends.get(neighbors.get(i));
+            if (neighbors.isEmpty()) {
+                System.out.print("No friends");
+            } else {
+                for (int i = 0; i < neighbors.size(); i++) {
+                    User neighbor = users.get(neighbors.get(i));
 
-                System.out.print(neighbor.getName()
-                        + " (ID: " + neighbor.getId() + ")");
+                    System.out.print(
+                        neighbor.getName() + " (ID: "
+                        + neighbor.getId() + ")"
+                    );
 
-                if (i < neighbors.size() - 1) {
-                    System.out.print(", ");
+                    if (i < neighbors.size() - 1) {
+                        System.out.print(", ");
+                    }
                 }
             }
 

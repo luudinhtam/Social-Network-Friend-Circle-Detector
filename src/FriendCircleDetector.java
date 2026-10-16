@@ -16,16 +16,33 @@ public class FriendCircleDetector {
         this.graph = graph;
     }
 
-    // Find all connected components using BFS
-    public List<List<Friend>> findFriendCircles() {
-        List<List<Friend>> friendCircles = new ArrayList<>();
+    // Detect all friend circles using BFS
+    public List<List<User>> detectFriendCircles() {
+        List<List<User>> friendCircles = new ArrayList<>();
         Set<Integer> visited = new HashSet<>();
 
-        for (Friend friend : graph.getAllFriends()) {
-            int friendId = friend.getId();
+        for (User user : graph.getAllUsers()) {
+            if (!visited.contains(user.getId())) {
+                List<User> circle = new ArrayList<>();
+                Queue<Integer> queue = new LinkedList<>();
 
-            if (!visited.contains(friendId)) {
-                List<Friend> circle = bfs(friendId, visited);
+                queue.offer(user.getId());
+                visited.add(user.getId());
+
+                while (!queue.isEmpty()) {
+                    int currentId = queue.poll();
+                    User currentUser = graph.getUser(currentId);
+
+                    circle.add(currentUser);
+
+                    for (int neighborId : graph.getNeighbors(currentId)) {
+                        if (!visited.contains(neighborId)) {
+                            visited.add(neighborId);
+                            queue.offer(neighborId);
+                        }
+                    }
+                }
+
                 friendCircles.add(circle);
             }
         }
@@ -33,57 +50,31 @@ public class FriendCircleDetector {
         return friendCircles;
     }
 
-    // BFS to find all friends in the same circle
-    private List<Friend> bfs(int startId, Set<Integer> visited) {
-        List<Friend> circle = new ArrayList<>();
-        Queue<Integer> queue = new LinkedList<>();
-
-        queue.offer(startId);
-        visited.add(startId);
-
-        while (!queue.isEmpty()) {
-            int currentId = queue.poll();
-            Friend currentFriend = graph.getFriend(currentId);
-
-            if (currentFriend != null) {
-                circle.add(currentFriend);
-            }
-
-            for (int neighborId : graph.getNeighbors(currentId)) {
-                if (!visited.contains(neighborId)) {
-                    visited.add(neighborId);
-                    queue.offer(neighborId);
-                }
-            }
-        }
-
-        return circle;
-    }
-
-    // Count the total number of friend circles
-    public int countFriendCircles() {
-        return findFriendCircles().size();
-    }
-
-    // Display all friend circles
+    // Display all detected friend circles
     public void displayFriendCircles() {
-        List<List<Friend>> friendCircles = findFriendCircles();
+        List<List<User>> circles = detectFriendCircles();
 
-        System.out.println("Total Friend Circles: " + friendCircles.size());
+        System.out.println("\n===== FRIEND CIRCLE RESULTS =====");
 
-        for (int i = 0; i < friendCircles.size(); i++) {
-            List<Friend> circle = friendCircles.get(i);
+        for (int i = 0; i < circles.size(); i++) {
+            List<User> circle = circles.get(i);
 
             System.out.println("\nFriend Circle " + (i + 1) + ":");
 
-            for (Friend friend : circle) {
+            for (User user : circle) {
                 System.out.println(
-                    "ID: " + friend.getId()
-                    + ", Name: " + friend.getName()
+                    "- " + user.getName() + " (ID: " + user.getId() + ")"
                 );
             }
 
-            System.out.println("Number of friends: " + circle.size());
+            System.out.println("Total users: " + circle.size());
         }
+
+        System.out.println("\nTotal friend circles: " + circles.size());
+    }
+
+    // Get the total number of friend circles
+    public int getFriendCircleCount() {
+        return detectFriendCircles().size();
     }
 }

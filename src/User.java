@@ -1,9 +1,9 @@
 
-public class Friend {
+public class User {
     private int id;
     private String name;
 
-    public Friend(int id, String name) {
+    public User(int id, String name) {
         this.id = id;
         this.name = name;
     }
@@ -26,7 +26,7 @@ public class Friend {
 
     @Override
     public String toString() {
-        return "Friend{" +
+        return "User{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 '}';
